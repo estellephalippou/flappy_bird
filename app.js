@@ -34,7 +34,7 @@ let cursors;
 let hasBumped = false;
 let isGameStarted = false;
 let messageToPlayer;
-let isGameOver = false; // Nouvelle variable pour gérer l'état de fin de jeu
+let isGameOver = false;
 
 function create() {
 
@@ -85,7 +85,7 @@ function update() {
 
     if (this.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.ENTER].isDown && !isGameStarted) {
         isGameStarted = true;
-        messageToPlayer.text = 'Instructions: Press the "^" button to stay upright\nAnd don\'t hit the columns or ground';
+        messageToPlayer.text = 'Instructions: Press the "space" button to stay upright\nAnd don\'t hit the columns or ground';
     }
 
     if (!hasLanded || !hasBumped) {
@@ -98,20 +98,19 @@ function update() {
 
     if ((hasLanded || hasBumped) && !isGameOver) { // Condition de game over
         messageToPlayer.text = `Oh no! You crashed!`;
-        bird.body.velocity.x = 0;
         isGameOver = true; // Marquer le jeu comme terminé
         showEndScreen(this, "Game Over! \n Press Enter to restart"); // Afficher l'écran de fin
     }
 
-    if (cursors.up.isDown && !hasLanded && !hasBumped && isGameStarted) {
+    if (cursors.space.isDown && !hasLanded && !hasBumped && isGameStarted) {
         bird.setVelocityY(-160);
     }
 
     if (bird.x > 750 && !isGameOver) { // Condition de victoire
         bird.setVelocityY(40);
         messageToPlayer.text = `Congrats! You won!`;
+        isGameOver = true; 
         showEndScreen(this, "You Won! \n Press Enter to restart"); // Afficher l'écran de fin
-        isGameOver = true; // Marquer le jeu comme terminé
     }
 }
 
