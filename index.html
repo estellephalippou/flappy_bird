@@ -1,11 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-  <script src="app.js"></script>
   <title>Flappy Bird Project</title>
+  <style>
+    :root {
+      --text: #ffffff;
+      --panel: rgba(0, 0, 0, 0.65);
+      --panel-border: rgba(255, 255, 255, 0.15);
+      --btn: rgba(0, 0, 0, 0.75);
+      --btn-hover: rgba(0, 0, 0, 0.9);
+      --focus: rgba(255, 255, 255, 0.6);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: url("assets/background.png") center / cover no-repeat fixed;
+    }
+
+    .panel {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 22px 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+
+    p {
+      margin: 0 0 18px;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    .buttons {
+      display: grid;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: var(--btn);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--btn-hover); }
+
+    button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+  </style>
 </head>
 <body>
+  <div class="container" >
+    <h1>Flappy Bird Project</h1>
+  
+    <main class="panel" role="main">
+      <h1>Choose difficulty</h1>
+      <p>Speed and pipes frequency change with difficulty.</p>
+      <div class="buttons">
+        <button id="easy-btn" onclick="window.location.href='play.html?difficulty=easy'">Easy</button>
+        <button id="medium-btn" onclick="window.location.href='play.html?difficulty=medium'">Medium</button>
+        <button id="hard-btn" onclick="window.location.href='play.html?difficulty=hard'">Hard</button>
+      </div>
+    </main>
+  </div>
 </body>
 </html>

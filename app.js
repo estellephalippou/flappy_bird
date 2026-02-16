@@ -43,9 +43,38 @@ let isEndScreenVisible = false;
 let pipes;
 let pipeSpawnTimer;
 const pipeGap = 170;
-const pipeSpawnDelayMs = 2000;
+let pipeSpawnDelayMs = 2500;
+let maxPipePairsOnScreen = 4;
 const victoryX = 750;
 const stopSpawningBeforeVictoryPx = 180;
+let difficulty = 'medium';
+
+function applyDifficulty(level) {
+    const normalized = (level || 'medium').toLowerCase();
+    difficulty = normalized;
+
+    if (normalized === 'easy') {
+        pipeScrollSpeed = 0.30;
+        pipeSpawnDelayMs = 2600;
+        maxPipePairsOnScreen = 3;
+        return;
+    }
+
+    if (normalized === 'hard') {
+        pipeScrollSpeed = 0.55;
+        pipeSpawnDelayMs = 1500;
+        maxPipePairsOnScreen = 6;
+        return;
+    }
+
+    // medium (default)
+    pipeScrollSpeed = 0.40;
+    pipeSpawnDelayMs = 2000;
+    maxPipePairsOnScreen = 4;
+}
+
+// Difficulty comes from the menu page: play.html?difficulty=easy|medium|hard
+applyDifficulty(new URLSearchParams(window.location.search).get('difficulty'));
 
 function create() {
     hasLanded = false;
@@ -61,7 +90,7 @@ function create() {
    
     cursors = this.input.keyboard.createCursorKeys();
     enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER); // Ajout de la touche "Entrée"
-    messageToPlayer = this.add.text(0, 0, `Instructions: Press Enter to start`, {
+    messageToPlayer = this.add.text(0, 0, `Difficulty: ${difficulty.toUpperCase()}  |  Press Enter to start`, {
         fontFamily: '"Comic Sans MS", Times, serif',
         fontSize: "20px",
         color: "white",
@@ -70,6 +99,22 @@ function create() {
         .setOrigin(0.5, 1)
         .setPosition(config.width / 2, config.height - 20)
         .setDepth(1000);
+
+    const homeButton = this.add.text(config.width - 16, config.height - 16, "Home", {
+        fontFamily: '"Comic Sans MS", Times, serif',
+        fontSize: "18px",
+        color: "white",
+        backgroundColor: "black",
+        padding: { x: 10, y: 6 },
+    })
+        .setOrigin(1, 1)
+        .setDepth(3000)
+        .setScrollFactor(0)
+        .setInteractive({ useHandCursor: true });
+
+    homeButton.on("pointerdown", () => {
+        window.location.href = "index.html";
+    });
 
     const roads = this.physics.add.staticGroup();
     
@@ -106,7 +151,7 @@ function update() {
         bird.body.allowGravity = true;
         background.tilePositionX += bgScrollSpeed;
         if (pipes) {
-            pipes.setVelocityX(-pipeScrollSpeed * 300);
+            pipes.setVelocityX(-pipeScrollSpeed * 200);
         }
     }
 
@@ -175,6 +220,12 @@ function update() {
 
 function spawnPipePair(scene) {
     if (!pipes) {
+        return;
+    }
+
+    // Control the "number of columns" by limiting how many pipe pairs can exist.
+    const currentPairs = Math.floor(pipes.getChildren().length / 2);
+    if (currentPairs >= maxPipePairsOnScreen) {
         return;
     }
 
