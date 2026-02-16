@@ -1,5 +1,6 @@
 let config = {
     renderer: Phaser.AUTO,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
     height: 600,
     physics: {
