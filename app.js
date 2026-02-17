@@ -31,6 +31,8 @@ function preload() {
 
 var bird;
 let background;
+let road;
+let groundCollider;
 let bgScrollSpeed = 0.2;
 let pipeScrollSpeed = 0.4;
 let hasLanded = false;
@@ -116,30 +118,47 @@ function create() {
     homeButton.on("pointerdown", () => {
         window.location.href = "index.html";
     });
-
-    const roads = this.physics.add.staticGroup();
     
     pipes = this.physics.add.group({
         allowGravity: false,
         immovable: true,
     });
-    
-    const road = roads.create(400, 568, "road").setScale(2).refreshBody();
-    road.setDepth(20);
 
-    bird = this.physics.add.sprite(0, 50, "bird").setScale(2);
+    const roadImage = this.textures.get("road").getSourceImage();
+    const roadHeight = roadImage ? roadImage.height * 2 : 64;
+
+    // Visual ground: a tiling sprite anchored to the bottom.
+    road = this.add.tileSprite(0, config.height, config.width, roadHeight, "road")
+        .setOrigin(0, 1)
+        .setDepth(20);
+    road.setTileScale(2, 2);
+
+    // Physics ground: invisible static body matching the road area.
+    groundCollider = this.add.rectangle(
+        config.width / 2,
+        config.height - roadHeight / 2,
+        config.width,
+        roadHeight,
+        0x000000,
+        0
+    );
+    this.physics.add.existing(groundCollider, true);
+
+    bird = this.physics.add.sprite(0, 50, "bird").setScale(2).setDepth(15);
     bird.setBounce(0.2);
     bird.setCollideWorldBounds(true);
 
-    this.physics.add.overlap(bird, road, () => (hasLanded = true), null, this);
-    this.physics.add.collider(bird, road);
+    this.physics.add.overlap(bird, groundCollider, () => (hasLanded = true), null, this);
+    this.physics.add.collider(bird, groundCollider);
 
     this.physics.add.overlap(bird, pipes, () => (hasBumped = true), null, this);
     this.physics.add.collider(bird, pipes);
 
 }
 
-function update() {
+function update(time, delta) {
+
+    const dt = (typeof delta === 'number' && delta > 0 ? delta : (1000 / 60)) / 1000;
 
     if (!isGameStarted) {
         bird.setVelocityY(0);
@@ -150,7 +169,16 @@ function update() {
     }
     else {
         bird.body.allowGravity = true;
-        background.tilePositionX += bgScrollSpeed;
+        // Keep previous "per-frame" feel but make it frame-rate independent.
+        background.tilePositionX += bgScrollSpeed * 60 * dt;
+
+        // Match ground scroll to pipes: pipes move at (pipeScrollSpeed * 200) px/s.
+        // tilePositionX is in texture pixels, so compensate for tileScale.
+        if (road) {
+            const pipePixelsPerSecond = pipeScrollSpeed * 200;
+            const tileScaleX = road.tileScaleX || 1;
+            road.tilePositionX += (pipePixelsPerSecond * dt) / tileScaleX;
+        }
         if (pipes) {
             pipes.setVelocityX(-pipeScrollSpeed * 200);
         }
